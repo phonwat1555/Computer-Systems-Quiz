@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>แบบทดสอบออนไลน์ - ระบบคอมพิวเตอร์</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;700&display=swap" rel="stylesheet">
+    <!-- Lucide Icons Script -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        body {
+            font-family: 'Sarabun', sans-serif;
+            /* --- พื้นหลังใหม่ที่ดูมินิมอล --- */
+            background-color: #ffffff;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='28' height='49' viewBox='0 0 28 49'%3E%3Cg fill-rule='evenodd'%3E%3Cg id='hexagons' fill='%23e2e8f0' fill-opacity='0.4' fill-rule='nonzero'%3E%3Cpath d='M13.99 9.25l13 7.5v15l-13 7.5L1 31.75v-15l12.99-7.5zM3 17.9v12.7l10.99 6.34 11-6.35V17.9l-11-6.34L3 17.9zM0 15l12.99-7.5L26 15v18.5l-13 7.5L0 33.5V15z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+        }
+        /* Animation for question transition */
+        .question-fade-in {
+            animation: fadeIn 0.5s ease-in-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body class="text-gray-800 flex items-center justify-center min-h-screen p-4">
+
+    <div class="container w-full max-w-3xl bg-white p-8 rounded-xl shadow-2xl">
+        <!-- หน้าแรก: กรอกข้อมูล -->
+        <div id="start-page">
+            <div class="header text-center mb-6 pb-6 border-b border-gray-200">
+                <img src="https://img2.pic.in.th/pic/a073f2d272ee737accffb71072567335.png" alt="โลโก้" class="mx-auto mb-4 rounded h-24 w-auto">
+                <p class="text-lg font-semibold text-gray-600">สาขาวิชาคอมพิวเตอร์ธุรกิจ</p>
+                <p class="text-md text-gray-500 mb-4">ศูนย์ส่งเสริมการเรียนรู้ระดับอำเภอเมืองนครราชสีมา</p>
+                <h1 class="text-3xl font-bold text-gray-700">แบบทดสอบวิชาระบบคอมพิวเตอร์</h1>
+            </div>
+            <h2 class="text-xl font-semibold text-center mb-6">กรุณากรอกข้อมูลเพื่อเริ่มทำแบบทดสอบ</h2>
+            <form id="info-form" class="space-y-4">
+                <div>
+                    <label for="fullname" class="block mb-1 font-bold">ชื่อ - นามสกุล</label>
+                    <div class="relative">
+                        <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                            <i data-lucide="user" class="w-5 h-5 text-gray-400"></i>
+                        </div>
+                        <input type="text" id="fullname" class="w-full p-3 pl-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition" required placeholder="กรอกชื่อ-นามสกุล">
+                    </div>
+                </div>
+                <div>
+                    <label for="student-id" class="block mb-1 font-bold">รหัสนักศึกษา</label>
+                     <div class="relative">
+                        <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                            <i data-lucide="key-round" class="w-5 h-5 text-gray-400"></i>
+                        </div>
+                        <input type="text" id="student-id" class="w-full p-3 pl-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition" required placeholder="กรอกรหัสนักศึกษา">
+                    </div>
+                </div>
+                <div class="flex flex-col sm:flex-row gap-4 pt-4">
+                    <button type="submit" class="w-full bg-blue-600 text-white py-3 px-6 rounded-lg font-semibold hover:bg-blue-700 transition shadow-md flex items-center justify-center gap-2">
+                        <i data-lucide="play-circle" class="w-5 h-5"></i>
+                        <span>เริ่มทำแบบทดสอบ</span>
+                    </button>
+                    <button type="button" class="w-full bg-gray-600 text-white py-3 px-6 rounded-lg font-semibold hover:bg-gray-700 transition shadow-md flex items-center justify-center gap-2" id="view-history-btn">
+                        <i data-lucide="megaphone" class="w-5 h-5"></i>
+                        <span>ประกาศผลคะแนน</span>
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <!-- หน้าทำแบบทดสอบ -->
+        <div id="quiz-page" class="hidden">
+            <div class="flex justify-between items-center mb-4">
+                <h2 id="quiz-header" class="text-xl font-bold">กำลังทำแบบทดสอบ...</h2>
+                <div id="progress-text" class="text-lg font-semibold text-gray-600"></div>
+            </div>
+            <div id="question-container" class="mb-6">
+                <!-- คำถามจะถูกแสดงที่นี่ -->
+            </div>
+            <div id="error-message" class="text-red-500 text-center mb-4 h-6"></div>
+            <div class="flex flex-col sm:flex-row gap-4">
+                <button id="back-btn" class="w-full sm:w-1/4 bg-gray-500 text-white py-3 px-6 rounded-lg font-semibold hover:bg-gray-600 transition shadow-md flex items-center justify-center gap-2">
+                    <i data-lucide="arrow-left-circle" class="w-5 h-5"></i>
+                    <span>ย้อนกลับ</span>
+                </button>
+                <button id="cancel-btn" class="w-full sm:w-1/4 bg-red-500 text-white py-3 px-6 rounded-lg font-semibold hover:bg-red-600 transition shadow-md flex items-center justify-center gap-2">
+                    <i data-lucide="x-circle" class="w-5 h-5"></i>
+                    <span>ยกเลิก</span>
+                </button>
+                <button id="next-btn" class="w-full sm:w-1/2 bg-blue-600 text-white py-3 px-6 rounded-lg font-semibold hover:bg-blue-700 transition shadow-md flex items-center justify-center gap-2">
+                </button>
+            </div>
+        </div>
+        
+        <!-- หน้ากำลังบันทึกข้อมูล -->
+        <div id="saving-page" class="hidden text-center py-10">
+            <h2 class="text-2xl font-bold mb-4">กำลังบันทึกผลคะแนน...</h2>
+            <p class="text-gray-600">กรุณารอสักครู่</p>
+        </div>
+
+        <!-- *** หน้าใหม่: รอตรวจสอบคะแนน *** -->
+        <div id="pre-result-page" class="hidden text-center">
+            <h2 class="text-3xl font-bold mb-4">ส่งคำตอบของคุณเรียบร้อยแล้ว</h2>
+            <div class="text-center bg-green-50 p-8 rounded-lg">
+                <i data-lucide="check-circle-2" class="w-16 h-16 text-green-500 mx-auto mb-4"></i>
+                <p class="text-lg text-gray-700">คุณได้ส่งคำตอบของแบบทดสอบเรียบร้อยแล้ว</p>
+                <p class="text-md text-gray-500">กดปุ่มด้านล่างเพื่อดูผลคะแนนของคุณ</p>
+            </div>
+            <button id="check-score-btn" class="mt-8 bg-blue-600 text-white py-3 px-6 rounded-lg font-semibold hover:bg-blue-700 transition shadow-md inline-flex items-center gap-2">
+                <i data-lucide="award" class="w-5 h-5"></i>
+                <span>ตรวจสอบคะแนนที่ทำ</span>
+            </button>
+        </div>
+
+        <!-- *** หน้าใหม่: แสดงผลคะแนน (ออกแบบใหม่) *** -->
+        <div id="result-page" class="hidden text-center">
+            <h2 class="text-3xl font-bold mb-4">ผลคะแนนของคุณ</h2>
+            <div class="bg-blue-50 p-8 rounded-lg flex flex-col items-center">
+                <p id="result-user-info" class="text-lg mb-4"></p>
+                <div class="relative w-48 h-48">
+                    <svg class="w-full h-full" viewBox="0 0 36 36">
+                        <path class="text-gray-200"
+                            stroke-dasharray="100, 100"
+                            d="M18 2.0845
+                              a 15.9155 15.9155 0 0 1 0 31.831
+                              a 15.9155 15.9155 0 0 1 0 -31.831"
+                            fill="none" stroke-width="3"></path>
+                        <path id="score-circle" class="text-blue-500"
+                            stroke-dasharray="0, 100"
+                            d="M18 2.0845
+                              a 15.9155 15.9155 0 0 1 0 31.831
+                              a 15.9155 15.9155 0 0 1 0 -31.831"
+                            fill="none" stroke-width="3" stroke-linecap="round"></path>
+                    </svg>
+                    <div class="absolute inset-0 flex flex-col items-center justify-center">
+                        <span id="result-score-text" class="text-5xl font-bold text-gray-700"></span>
+                        <span class="text-lg text-gray-500">คะแนน</span>
+                    </div>
+                </div>
+                <p id="result-message" class="mt-4 text-lg h-6"></p>
+            </div>
+            <button class="mt-8 bg-blue-600 text-white py-3 px-6 rounded-lg font-semibold hover:bg-blue-700 transition shadow-md inline-flex items-center gap-2" onclick="location.reload()">
+                <i data-lucide="home" class="w-5 h-5"></i>
+                <span>กลับไปหน้าแรก</span>
+            </button>
+        </div>
+
+        <!-- หน้าประกาศผล -->
+        <div id="history-page" class="hidden">
+            <h2 class="text-3xl font-bold mb-6 text-center">ประกาศผลการทำคะแนน</h2>
+            <div class="text-center bg-gray-50 p-8 rounded-lg">
+                <i data-lucide="bell-ring" class="w-16 h-16 text-blue-500 mx-auto mb-4"></i>
+                <p class="text-lg text-gray-700">ผู้สอนจะแจ้งผลคะแนนให้ทราบอีกครั้ง</p>
+                <p class="text-md text-gray-500">ผ่านช่องทางที่ได้นัดหมายไว้</p>
+            </div>
+            <div class="text-center">
+               <button class="mt-8 bg-blue-600 text-white py-3 px-6 rounded-lg font-semibold hover:bg-blue-700 transition shadow-md inline-flex items-center gap-2" onclick="location.reload()">
+                   <i data-lucide="home" class="w-5 h-5"></i>
+                   <span>กลับไปหน้าแรก</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Activate Lucide Icons
+        lucide.createIcons();
+
+        // Page elements
+        const startPage = document.getElementById('start-page');
+        const quizPage = document.getElementById('quiz-page');
+        const savingPage = document.getElementById('saving-page');
+        const preResultPage = document.getElementById('pre-result-page');
+        const resultPage = document.getElementById('result-page');
+        const historyPage = document.getElementById('history-page');
+        
+        // Form and buttons
+        const infoForm = document.getElementById('info-form');
+        const viewHistoryBtn = document.getElementById('view-history-btn');
+        const nextBtn = document.getElementById('next-btn');
+        const backBtn = document.getElementById('back-btn');
+        const cancelBtn = document.getElementById('cancel-btn');
+        const checkScoreBtn = document.getElementById('check-score-btn');
+
+        // Quiz elements
+        const quizHeader = document.getElementById('quiz-header');
+        const questionContainer = document.getElementById('question-container');
+        const progressText = document.getElementById('progress-text');
+        const errorMessage = document.getElementById('error-message');
+
+        let currentUser = {};
+        let currentQuestionIndex = 0;
+        let userAnswers = [];
+        let finalScoreData = {};
+
+        const questions = [
+            { question: "1. อุปกรณ์ใดทำหน้าที่เป็น 'สมอง' ของคอมพิวเตอร์?", options: ["แรม (RAM)", "ฮาร์ดดิสก์ (Hard Disk)", "ซีพียู (CPU)", "การ์ดจอ (Graphics Card)"], answer: "ซีพียู (CPU)" },
+            { question: "2. ข้อใดคือหน่วยความจำหลักของคอมพิวเตอร์ที่ใช้เก็บข้อมูลชั่วคราวขณะเปิดเครื่องใช้งาน?", options: ["SSD", "RAM", "ROM", "Flash Drive"], answer: "RAM" },
+            { question: "3. อุปกรณ์ใดใช้สำหรับแสดงผลข้อมูลในรูปแบบของรูปภาพและข้อความ?", options: ["เมาส์", "คีย์บอร์ด", "จอภาพ", "สแกนเนอร์"], answer: "จอภาพ" },
+            { question: "4. ข้อใดคือซอฟต์แวร์ระบบ (System Software)?", options: ["Microsoft Word", "Google Chrome", "Windows 11", "Adobe Photoshop"], answer: "Windows 11" },
+            { question: "5. ซอฟต์แวร์ที่ใช้ในการสร้างตารางคำนวณและกราฟคือข้อใด?", options: ["ซอฟต์แวร์นำเสนอผลงาน", "ซอฟต์แวร์ประมวลผลคำ", "ซอฟต์แวร์จัดการฐานข้อมูล", "ซอฟต์แวร์ตารางคำนวณ"], answer: "ซอฟต์แวร์ตารางคำนวณ" },
+            { question: "6. ข้อใดคือหน่วยวัดความจุของข้อมูลที่เล็กที่สุด?", options: ["บิต (Bit)", "ไบต์ (Byte)", "กิโลไบต์ (Kilobyte)", "เมกะไบต์ (Megabyte)"], answer: "บิต (Bit)" },
+            { question: "7. เลขฐานสอง (Binary) ประกอบด้วยตัวเลขใดบ้าง?", options: ["0 และ 1", "1 และ 2", "0 ถึง 9", "0 ถึง 7"], answer: "0 และ 1" },
+            { question: "8. พอร์ต (Port) ใดที่นิยมใช้ในการเชื่อมต่อจอภาพคอมพิวเตอร์ในปัจจุบัน?", options: ["VGA", "PS/2", "HDMI", "Serial Port"], answer: "HDMI" },
+            { question: "9. อุปกรณ์ใดทำหน้าที่แปลงสัญญาณคอมพิวเตอร์ให้สามารถส่งผ่านสายโทรศัพท์ได้?", options: ["เราเตอร์ (Router)", "สวิตช์ (Switch)", "โมเด็ม (Modem)", "ฮับ (Hub)"], answer: "โมเด็ม (Modem)" },
+            { question: "10. 'LAN' เป็นคำย่อของอะไร?", options: ["Large Area Network", "Local Area Network", "Logical Area Network", "Long Area Network"], answer: "Local Area Network" },
+            { question: "11. ข้อใดคืออุปกรณ์ป้อนข้อมูล (Input Device)?", options: ["เครื่องพิมพ์ (Printer)", "ลำโพง (Speaker)", "ไมโครโฟน (Microphone)", "จอภาพ (Monitor)"], answer: "ไมโครโฟน (Microphone)" },
+            { question: "12. ROM (Read-Only Memory) มีหน้าที่หลักคืออะไร?", options: ["เก็บข้อมูลชั่วคราว", "เก็บโปรแกรมที่ใช้ในการบูตเครื่อง (BIOS/UEFI)", "ประมวลผลข้อมูล", "แสดงผลกราฟิก"], answer: "เก็บโปรแกรมที่ใช้ในการบูตเครื่อง (BIOS/UEFI)" },
+            { question: "13. การกระทำใดถือเป็นภัยคุกคามทางคอมพิวเตอร์?", options: ["การสำรองข้อมูล", "การติดตั้งโปรแกรมป้องกันไวรัส", "การเปิดอีเมลจากผู้ส่งที่ไม่รู้จักซึ่งมีไฟล์แนบ", "การอัปเดตระบบปฏิบัติการ"], answer: "การเปิดอีเมลจากผู้ส่งที่ไม่รู้จักซึ่งมีไฟล์แนบ" },
+            { question: "14. โปรแกรมที่ถูกสร้างขึ้นมาเพื่อสร้างความเสียหายให้กับระบบคอมพิวเตอร์เรียกว่าอะไร?", options: ["เฟิร์มแวร์ (Firmware)", "ไดรเวอร์ (Driver)", "มัลแวร์ (Malware)", "โอเพนซอร์ส (Open Source)"], answer: "มัลแวร์ (Malware)" },
+            { question: "15. ส่วนประกอบใดของคอมพิวเตอร์ที่เปรียบเสมือน 'โต๊ะทำงาน' สำหรับวางข้อมูลที่กำลังใช้งาน?", options: ["ฮาร์ดดิสก์ (Hard Disk)", "ซีพียู (CPU)", "แรม (RAM)", "พาวเวอร์ซัพพลาย (Power Supply)"], answer: "แรม (RAM)" },
+            { question: "16. IP Address มีไว้เพื่ออะไร?", options: ["ระบุตำแหน่งที่ตั้งของผู้ผลิตคอมพิวเตอร์", "ระบุตัวตนของคอมพิวเตอร์ในเครือข่าย", "บอกความเร็วในการเชื่อมต่ออินเทอร์เน็ต", "เป็นชื่อยี่ห้อของอุปกรณ์เครือข่าย"], answer: "ระบุตัวตนของคอมพิวเตอร์ในเครือข่าย" },
+            { question: "17. ข้อใดคือตัวอย่างของอุปกรณ์จัดเก็บข้อมูลแบบทุติยภูมิ (Secondary Storage)?", options: ["Register", "Cache", "RAM", "SSD (Solid State Drive)"], answer: "SSD (Solid State Drive)" },
+            { question: "18. เมนบอร์ด (Mainboard) มีหน้าที่สำคัญอย่างไร?", options: ["จ่ายกระแสไฟฟ้าให้กับอุปกรณ์ทั้งหมด", "ประมวลผลคำสั่งต่างๆ", "เป็นแผงวงจรหลักที่เชื่อมต่ออุปกรณ์ทุกชิ้นเข้าด้วยกัน", "ระบายความร้อนออกจากซีพียู"], answer: "เป็นแผงวงจรหลักที่เชื่อมต่ออุปกรณ์ทุกชิ้นเข้าด้วยกัน" },
+            { question: "19. ซอฟต์แวร์ประยุกต์ (Application Software) คืออะไร?", options: ["โปรแกรมที่ควบคุมการทำงานของฮาร์ดแวร์", "โปรแกรมที่ผู้ใช้ติดตั้งเพื่อทำงานเฉพาะด้าน เช่น เล่นเกม, พิมพ์งาน", "ระบบปฏิบัติการของคอมพิวเตอร์", "โปรแกรมที่ใช้ในการเปิดเครื่องคอมพิวเตอร์"], answer: "โปรแกรมที่ผู้ใช้ติดตั้งเพื่อทำงานเฉพาะด้าน เช่น เล่นเกม, พิมพ์งาน" },
+            { question: "20. ข้อใดคือวิธีการดูแลรักษาคอมพิวเตอร์ที่เหมาะสม?", options: ["เปิดฝาเคสทิ้งไว้เพื่อระบายความร้อน", "ไม่เคยปิดเครื่องคอมพิวเตอร์เลย", "ทำความสะอาดภายในเคสและพัดลมอย่างสม่ำเสมอ", "ดาวน์โหลดโปรแกรมจากแหล่งที่ไม่น่าเชื่อถือ"], answer: "ทำความสะอาดภายในเคสและพัดลมอย่างสม่ำเสมอ" }
+        ];
+
+        // Event listener to start the quiz
+        infoForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            currentUser.fullname = document.getElementById('fullname').value;
+            currentUser.studentId = document.getElementById('student-id').value;
+            startQuiz();
+        });
+
+        function startQuiz() {
+            currentQuestionIndex = 0;
+            userAnswers = new Array(questions.length).fill(null);
+            startPage.classList.add('hidden');
+            quizPage.classList.remove('hidden');
+            displayQuestion();
+        }
+
+        function displayQuestion() {
+            const q = questions[currentQuestionIndex];
+            questionContainer.innerHTML = '';
+            const questionDiv = document.createElement('div');
+            questionDiv.className = 'question-fade-in';
+            let content = `<div class="bg-gray-50 p-4 rounded-lg"><p class="font-semibold mb-3 text-lg">${q.question}</p><div class="options space-y-2">`;
+            q.options.forEach(option => {
+                content += `<label class="block p-3 bg-white border border-gray-200 rounded-lg hover:bg-blue-50 cursor-pointer has-[:checked]:bg-blue-100 has-[:checked]:border-blue-400"><input type="radio" name="question${currentQuestionIndex}" value="${option}" class="mr-2" required> ${option}</label>`;
+            });
+            content += `</div></div>`;
+            questionDiv.innerHTML = content;
+            questionContainer.appendChild(questionDiv);
+            const previousAnswer = userAnswers[currentQuestionIndex];
+            if (previousAnswer) {
+                const selectedRadio = questionDiv.querySelector(`input[value="${previousAnswer}"]`);
+                if (selectedRadio) { selectedRadio.checked = true; }
+            }
+            quizHeader.innerText = `ผู้ทำแบบทดสอบ: ${currentUser.fullname}`;
+            progressText.innerText = `ข้อที่ ${currentQuestionIndex + 1} / ${questions.length}`;
+            backBtn.classList.toggle('hidden', currentQuestionIndex === 0);
+            if (currentQuestionIndex === questions.length - 1) {
+                nextBtn.innerHTML = `<i data-lucide="send" class="w-5 h-5"></i><span>ส่งคำตอบ</span>`;
+                nextBtn.classList.replace('bg-blue-600', 'bg-green-600');
+                nextBtn.classList.replace('hover:bg-blue-700', 'hover:bg-green-700');
+            } else {
+                nextBtn.innerHTML = `<i data-lucide="arrow-right-circle" class="w-5 h-5"></i><span>ข้อถัดไป</span>`;
+                nextBtn.classList.replace('bg-green-600', 'bg-blue-600');
+                nextBtn.classList.replace('hover:bg-green-700', 'hover:bg-blue-700');
+            }
+            lucide.createIcons();
+        }
+
+        nextBtn.addEventListener('click', () => {
+            const selectedOption = document.querySelector(`input[name="question${currentQuestionIndex}"]:checked`);
+            if (!selectedOption) {
+                errorMessage.innerText = 'กรุณาเลือกคำตอบก่อนไปข้อถัดไป';
+                return;
+            }
+            errorMessage.innerText = '';
+            userAnswers[currentQuestionIndex] = selectedOption.value;
+            if (currentQuestionIndex < questions.length - 1) {
+                currentQuestionIndex++;
+                displayQuestion();
+            } else {
+                quizPage.classList.add('hidden');
+                savingPage.classList.remove('hidden');
+                calculateAndShowResult();
+            }
+        });
+
+        backBtn.addEventListener('click', () => {
+            if (currentQuestionIndex > 0) {
+                currentQuestionIndex--;
+                displayQuestion();
+            }
+        });
+
+        cancelBtn.addEventListener('click', () => {
+            location.reload();
+        });
+
+        async function calculateAndShowResult() {
+            let score = 0;
+            userAnswers.forEach((answer, index) => {
+                if (answer === questions[index].answer) score++;
+            });
+            const saveSuccess = await saveResultToGoogleSheet(score);
+            finalScoreData = { score: score, total: questions.length, saveSuccess: saveSuccess };
+            savingPage.classList.add('hidden');
+            preResultPage.classList.remove('hidden');
+            lucide.createIcons();
+        }
+
+        checkScoreBtn.addEventListener('click', () => {
+            preResultPage.classList.add('hidden');
+            resultPage.classList.remove('hidden');
+            displayFinalScore();
+        });
+
+        function displayFinalScore() {
+            const { score, total, saveSuccess } = finalScoreData;
+            document.getElementById('result-user-info').innerText = `${currentUser.fullname} (รหัส: ${currentUser.studentId})`;
+            document.getElementById('result-score-text').innerText = score;
+            const percentage = (score / total) * 100;
+            const scoreCircle = document.getElementById('score-circle');
+            setTimeout(() => {
+                scoreCircle.style.transition = 'stroke-dasharray 1s ease-in-out';
+                scoreCircle.style.strokeDasharray = `${percentage}, 100`;
+            }, 100);
+            const resultMessage = document.getElementById('result-message');
+            if (saveSuccess) {
+                resultMessage.innerHTML = '<span class="text-green-600 font-semibold">ส่งคำตอบสำเร็จ!</span>';
+            } else {
+                resultMessage.innerHTML = '<span class="text-red-600 font-semibold">เกิดข้อผิดพลาดในการส่งคำตอบ!</span>';
+            }
+        }
+
+        async function saveResultToGoogleSheet(score) {
+            const scriptURL = 'https://script.google.com/macros/s/AKfycbxQz7BYWi048zH2QZvy4cBYOCCcA0kS1c6kFSq1a8h3TCveoJ1P1I3XfAeSVJGkl92W/exec';
+            const formData = new FormData();
+            formData.append('fullname', currentUser.fullname);
+            formData.append('studentId', currentUser.studentId);
+            formData.append('score', `${score}/${questions.length}`);
+            try {
+                const response = await fetch(scriptURL, { method: 'POST', body: formData });
+                return response.ok;
+            } catch (error) {
+                console.error('Error!', error.message);
+                return false;
+            }
+        }
+
+        viewHistoryBtn.addEventListener('click', function() {
+            startPage.classList.add('hidden');
+            historyPage.classList.remove('hidden');
+            lucide.createIcons();
+        });
+
+    </script>
+
+</body>
+</html>
